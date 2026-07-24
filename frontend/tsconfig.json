@@ -55,7 +55,7 @@
     "jsx": "react-jsx",
 
     "strict": true,
-    "types": ["vite/client"]
+    "types": ["vite/client", "vitest/globals"]
     
   }
 }
