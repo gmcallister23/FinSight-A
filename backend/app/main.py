@@ -46,7 +46,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # "testserver" is required for FastAPI TestClient (pytest) to work
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["localhost", "127.0.0.1", "testserver", "*.render.com", "*.vercel.app"]
+    allowed_hosts=["localhost", "127.0.0.1", "testserver", "*.onrender.com", "*.vercel.app"]
 )
 
 app.add_middleware(
