@@ -9,7 +9,7 @@ export interface Stock {
 
 export interface StockQuote {
   symbol: string;
-  price?: string;
+  price?: number;
   change?: string;
   change_percent?: string;
   volume?: string;
