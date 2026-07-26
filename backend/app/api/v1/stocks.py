@@ -5,9 +5,11 @@ Provides real-time stock prices, market trends, and historical price data
 using Alpha Vantage API with in-memory caching (15-minute TTL).
 """
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
+from app.api.deps import get_current_user
+from app.models.user import User
 from app.services.market_data import alpha_vantage
 from app.services.cache import cache
 
@@ -143,12 +145,14 @@ def get_market_trends(symbol: str) -> MarketTrendsResponse:
     "/cache/stats",
     response_model=CacheStats,
     summary="Get cache performance stats",
+    responses={401: {"description": "Not authenticated"}},
 )
-def get_cache_stats() -> CacheStats:
+def get_cache_stats(current_user: User = Depends(get_current_user)) -> CacheStats:
     """
     Get in-memory cache statistics (hits, misses, hit rate).
     
     Useful for monitoring cache effectiveness and API call savings.
+    Requires authentication (see P3 finding, Danny's pen test).
     """
     stats = cache.stats()
     return CacheStats(**stats)
@@ -157,16 +161,33 @@ def get_cache_stats() -> CacheStats:
 @router.post(
     "/cache/clear",
     summary="Clear cache manually",
+    responses={401: {"description": "Not authenticated"}},
 )
-def clear_cache(symbol: str = None):
+def clear_cache(
+    symbol: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
+):
     """
     Manually clear cached data.
     
     - **symbol** (optional): Clear cache for specific symbol only.
       If omitted, clears entire cache.
+
+    Requires authentication (see P3 finding, Danny's pen test).
     """
+    # Validate symbol format before use, consistent with the ticker
+    # pattern used elsewhere (portfolio/watchlist schemas).
+    if symbol is not None:
+        import re
+        if not re.match(r"^[A-Za-z0-9.]{1,10}$", symbol):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid symbol format",
+            )
+        symbol = symbol.upper()
+
     cache.clear(symbol)
-    return {"message": f"Cache cleared" + (f" for {symbol}" if symbol else "")}
+    return {"message": "Cache cleared" + (f" for {symbol}" if symbol else "")}
 
 
 @router.post(
