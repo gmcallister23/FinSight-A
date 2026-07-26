@@ -32,11 +32,19 @@ async def lifespan(app: FastAPI):
     logger.info(f"{settings.app_name} shutting down")
 
 
+# Disable interactive API docs in production (Danny's Deployment
+# Security Checklist, item E2) — /docs, /redoc, /openapi.json are
+# only exposed in development.
+_docs_enabled = settings.environment != "production"
+
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0",
     description="AI-Powered Investment Intelligence Platform",
     lifespan=lifespan,
+    docs_url="/docs" if _docs_enabled else None,
+    redoc_url="/redoc" if _docs_enabled else None,
+    openapi_url="/openapi.json" if _docs_enabled else None,
 )
 
 # Attach the rate limiter to the app and register the 429 handler
@@ -46,7 +54,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # "testserver" is required for FastAPI TestClient (pytest) to work
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["localhost", "127.0.0.1", "testserver", "*.render.com", "*.vercel.app"]
+    allowed_hosts=["localhost", "127.0.0.1", "testserver", "*.onrender.com", "*.vercel.app"]
 )
 
 app.add_middleware(
