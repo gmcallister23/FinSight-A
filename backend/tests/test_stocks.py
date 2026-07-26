@@ -19,9 +19,15 @@ def test_invalid_symbol_with_numbers_fails(client):
     assert response.status_code == 400
 
 
-def test_cache_stats_endpoint_accessible(client):
-    """Cache stats endpoint returns valid structure."""
+def test_cache_stats_endpoint_requires_auth(client):
+    """Cache stats endpoint requires authentication (see P3 finding)."""
     response = client.get("/api/v1/stocks/cache/stats")
+    assert response.status_code == 401
+
+
+def test_cache_stats_endpoint_accessible(client, auth_headers):
+    """Cache stats endpoint returns valid structure when authenticated."""
+    response = client.get("/api/v1/stocks/cache/stats", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert "hits" in data
@@ -29,11 +35,26 @@ def test_cache_stats_endpoint_accessible(client):
     assert "hit_rate" in data
 
 
-def test_cache_clear_endpoint(client):
-    """Cache clear endpoint returns success message."""
+def test_cache_clear_endpoint_requires_auth(client):
+    """Cache clear endpoint requires authentication (see P3 finding)."""
     response = client.post("/api/v1/stocks/cache/clear")
+    assert response.status_code == 401
+
+
+def test_cache_clear_endpoint(client, auth_headers):
+    """Cache clear endpoint returns success message when authenticated."""
+    response = client.post("/api/v1/stocks/cache/clear", headers=auth_headers)
     assert response.status_code == 200
     assert "message" in response.json()
+
+
+def test_cache_clear_invalid_symbol_fails(client, auth_headers):
+    """Cache clear with a malformed symbol returns 422 (see P3 finding)."""
+    response = client.post(
+        "/api/v1/stocks/cache/clear?symbol=<script>",
+        headers=auth_headers,
+    )
+    assert response.status_code == 422
 
 
 def test_price_history_invalid_days_fails(client):

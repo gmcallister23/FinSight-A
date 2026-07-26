@@ -8,7 +8,8 @@ from app.api.deps import get_current_user
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.limiter import limiter
-from app.core.security import create_access_token, hash_password, verify_password
+from app.core.logging import logger
+from app.core.security import create_access_token, decode_access_token, hash_password, verify_password
 from app.models.user import User
 from app.schemas.auth import UserResponse, UserSignup, UserProfileUpdate
 
@@ -263,9 +264,18 @@ def forgot_password(
         token_type="password_reset",
     )
     
+    # SECURITY (P1): the reset token must never be returned in the
+    # API response — that would let anyone who knows a user's email
+    # request and use their reset token, with no access to the
+    # victim's mailbox required. In a real deployment this token
+    # would be emailed to the user. For this project (no email
+    # sending configured), we log it server-side only so the token
+    # is still retrievable for manual testing/demo purposes without
+    # exposing it to the API caller.
+    logger.info(f"Password reset requested for user {user.id} (token issued, not returned in response)")
+
     return {
-        "message": "Reset token sent to email",
-        "reset_token": reset_token,
+        "message": "If that email is registered, a reset link has been sent.",
         "expires_in": 86400
     }
 
@@ -294,46 +304,37 @@ def reset_password(
     
     Token must not be expired (valid for 24 hours from generation).
     """
-    try:
-        import jwt
-        
-        token_payload = jwt.decode(
-            payload.reset_token,
-            settings.jwt_secret_key,
-            algorithms=[settings.jwt_algorithm]
-        )
-        
-        # Reject tokens that aren't password-reset tokens (e.g. a
-        # regular session token) so a login session can't be misused
-        # to reset a password, and vice versa. See API-A2.
-        if token_payload.get("type") != "password_reset":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid token"
-            )
-        
-        user_id = token_payload.get("sub")
-        user = db.query(User).filter(User.id == user_id).first()
-        
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
-            )
-        
-        user.password_hash = hash_password(payload.new_password)
-        db.commit()
-        db.refresh(user)
-        
-        return user
-    
-    except jwt.ExpiredSignatureError:
+    # Use the shared decode_access_token() (jose-based) rather than a
+    # separately-imported PyJWT — using two different JWT libraries
+    # for encode vs decode caused a library mismatch bug (see P2).
+    token_payload = decode_access_token(payload.reset_token)
+
+    if token_payload is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Token expired"
+            detail="Token expired or invalid"
         )
-    except jwt.InvalidTokenError:
+
+    # Reject tokens that aren't password-reset tokens (e.g. a
+    # regular session token) so a login session can't be misused
+    # to reset a password, and vice versa. See API-A2.
+    if token_payload.get("type") != "password_reset":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid token"
         )
+
+    user_id = token_payload.get("sub")
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    user.password_hash = hash_password(payload.new_password)
+    db.commit()
+    db.refresh(user)
+
+    return user

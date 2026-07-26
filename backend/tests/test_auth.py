@@ -75,14 +75,19 @@ def test_logout_clears_cookie(client, auth_headers):
 
 
 def test_forgot_password_existing_user(client, test_user):
-    """Forgot password returns reset token for existing user."""
+    """
+    Forgot password succeeds for an existing user, and does NOT
+    return the reset token in the response body (see P1 finding
+    in Danny's pen test — token disclosure enables account
+    takeover for anyone who knows a registered email).
+    """
     response = client.post(
         "/api/v1/auth/forgot-password",
         json={"email": test_user.email}
     )
     assert response.status_code == 200
     data = response.json()
-    assert "reset_token" in data
+    assert "reset_token" not in data
     assert data["expires_in"] == 86400
 
 
@@ -97,11 +102,16 @@ def test_forgot_password_nonexistent_user_fails(client):
 
 def test_reset_password_success(client, test_user):
     """Reset password with valid token succeeds."""
-    forgot_response = client.post(
-        "/api/v1/auth/forgot-password",
-        json={"email": test_user.email}
+    from datetime import timedelta
+    from app.core.security import create_access_token
+
+    # Reset tokens are no longer returned by the API (see P1 fix),
+    # so tests generate one directly the same way forgot-password does.
+    reset_token = create_access_token(
+        subject=test_user.id,
+        expires_delta=timedelta(hours=24),
+        token_type="password_reset",
     )
-    reset_token = forgot_response.json()["reset_token"]
 
     reset_response = client.post(
         "/api/v1/auth/reset-password",
@@ -130,11 +140,14 @@ def test_reset_token_cannot_be_used_as_session(client, test_user):
     Security regression test (API-A2): a password-reset token must
     NOT be usable as a login session cookie.
     """
-    forgot_response = client.post(
-        "/api/v1/auth/forgot-password",
-        json={"email": test_user.email}
+    from datetime import timedelta
+    from app.core.security import create_access_token
+
+    reset_token = create_access_token(
+        subject=test_user.id,
+        expires_delta=timedelta(hours=24),
+        token_type="password_reset",
     )
-    reset_token = forgot_response.json()["reset_token"]
 
     # Attempt to use the reset token as a session cookie
     response = client.get(
