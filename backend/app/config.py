@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
     
     # CORS
-    FRONTEND_ORIGIN: str = "http://localhost:5173"
+    FRONTEND_ORIGIN: str = "https://fin-sight-a-five.vercel.app"
     
     class Config:
         env_file = ".env"
