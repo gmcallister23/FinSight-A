@@ -3,38 +3,50 @@ import { useAppDispatch } from "../app/hooks";
 import { updateHolding } from "../features/portfolio/portfolioSlice";
 import { useState } from "react";
 import UpdateHoldingForm from "./UpdateHoldingForm";
+import type { StockQuote } from "../types/stock";
 
 interface HoldingCardProps {
     holding: Holding;
     portfolioId: string;
+    quote?: StockQuote;
     onDelete: (holding: Holding) => void;
 }
 
 export default function HoldingCard({
     holding,
     portfolioId,
+    quote,
     onDelete,
 }: HoldingCardProps){
 
     const [editingHolding, setEditingHolding] = useState(false);
+    
+    const currentPrice = quote?.price ?? 0;
+    const marketValue = holding.quantity * currentPrice;
 
     return (
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 transition hover:border-slate-700 hover:bg-slate-500">
-            <h3>
+        <div className="grid grid-cols-6 items-center border border-slate-800 bg-slate-900 px-4 py-3 transition hover:border-slate-700 hover:bg-slate-500">
+            <div className="font-semibold">
                 {holding.symbol}
-            </h3>
-            <p>
-                Quantity: {holding.quantity}
-            </p>
-            <p>
-                Average Cost: ${holding.avg_cost}
-            </p>
+            </div>
+            <div>
+                Quantity: {Number(holding.quantity).toFixed(0)}
+            </div>
+            <div>
+                Average Cost: ${Number(holding.avg_cost).toFixed(2)}
+            </div>
+            <div>
+                {marketValue.toFixed(2)}
+            </div>
 
-            <button onClick={() => setEditingHolding(true)}>
+            <button 
+            className="rounded-lg px-3 py-1 text-sm text-cyan-400 hover:bg-cyan-500 hover:text-white"
+            onClick={() => setEditingHolding(true)}>
                 Edit
             </button>
 
-            <button onClick={() => onDelete(holding)}>
+            <button className="rounded-lg px-3 py-1 text-sm text-red-400 hover:bg-red-500 hover:text-white"
+            onClick={() => onDelete(holding)}>
                 Delete
             </button>
 

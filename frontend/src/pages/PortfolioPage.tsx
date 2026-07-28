@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { addHolding, addPortfolio, fetchHoldings, fetchPortfolios, removePortfolio, setSelectedPortfolio, removeHolding, fetchTransactions } from "../features/portfolio/portfolioSlice";
+import { addHolding, addPortfolio, fetchHoldings, fetchPortfolios, removePortfolio, setSelectedPortfolio, removeHolding, fetchTransactions, fetchPortfolio } from "../features/portfolio/portfolioSlice";
 import type { Portfolio, Holding } from "../types/portfolio";
 import AddHoldingForm from '../components/AddHoldingForm';
 import PortfolioList from "../components/PortfolioList";
@@ -40,6 +40,10 @@ export default function PortfolioPage() {
         state => state.portfolio.holdings
     )
 
+    const quote = useAppSelector(
+        state => state.portfolio.quotes
+    )
+
     const [showHoldingForm, setShowHoldingForm] = useState(false);
     const [showTransactionForm, setShowTransactionForm] = useState(false);
 
@@ -50,7 +54,8 @@ export default function PortfolioPage() {
         console.log('Selected Portfolio', portfolio);
 
         dispatch(setSelectedPortfolio(portfolio));
-        dispatch(fetchHoldings(portfolio.id));
+        //dispatch(fetchHoldings(portfolio.id));
+        dispatch(fetchPortfolio(portfolio.id))
         dispatch(fetchTransactions(portfolio.id))
         dispatch(fetchPortfolioInsights(portfolio.id))
     }
@@ -161,6 +166,7 @@ export default function PortfolioPage() {
                             </header>
                             <HoldingList
                             holdings={holdings}
+                            quotes={quote}
                             portfolioId={selectedPortfolio.id}
                             onDelete={handleDeleteHolding}
                             />
@@ -179,20 +185,7 @@ export default function PortfolioPage() {
                             <div>
                                 <AIInsightCard />
                             </div>
-                            <div>
-                           
-                            <button 
-                            className='border rounded-lg py-2 px-2 bg-cyan-500 mt-2 mb-2 transition hover:bg-slate-500'
-                            onClick={() => setShowTransactionForm(true)}>
-                                Add Transaction
-                            </button>
-                            {showTransactionForm && (
-                                <TransactionForm
-                                portfolioId={selectedPortfolio.id}
-                                onClose={() => setShowTransactionForm(false)}
-                                />
-                            )}
-                            </div>
+                
                             <TransactionList />
                             
                         </div>

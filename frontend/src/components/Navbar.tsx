@@ -12,29 +12,34 @@ function Navbar() {
                 <div className='text-xl font-bold'>
                     FinSight
                 </div>
-
+                {user ? (
+                    <>
                 <div className="flex gap-6">
                     <Link to="/dashboard">Dashboard</Link>
                     <Link to='/market-trends'>Market Trends</Link>
-                    <Link to='/profile'>Profile</Link>
+                    
                     <Link to='/watchlist'>Watchlist</Link>
                     <Link to='/chat'>AI Chat</Link>
                     <Link to='/portfolio'>Portfolio</Link>
                 </div>
+
+                <div className="flex items-center gap-4">
+                    <span> <Link to='/profile'>{user.email}</Link></span>
+                    <LogoutButton />
+                </div>
+                </>
+                ):
+                 (
+                    <>
+                    
                 <div className="flex items-center gap-4">
 
-                    {user && (
-                        <span>{user?.email}</span>
-                    )}
-                    {user ? (
-                        <LogoutButton />
-                    ) : (
-                        <>
                         <SignupButton />
                         <LoginButton />
-                        </>
-                    )}
+                       
                 </div>
+                </>
+                )}
             </div>
         </nav>
     )
