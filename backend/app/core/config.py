@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     
     # Security (Sprint 3)
     cors_allow_credentials: bool = True
-    cors_allow_methods: list = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    cors_allow_methods: list = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     cors_allow_headers: list = ["Content-Type", "Authorization"]
     cors_max_age: int = 3600
     

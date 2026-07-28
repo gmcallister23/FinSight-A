@@ -38,14 +38,30 @@ class ResetPasswordRequest(BaseModel):
 
 
 def _set_auth_cookie(response: Response, token: str) -> None:
-    """Set the JWT as an httpOnly cookie on the response."""
+    """
+    Set the JWT as an httpOnly cookie on the response.
+
+    samesite="none" is required because frontend (Vercel) and
+    backend (Render) are on different domains -- a cross-site
+    request. With samesite="lax" (the old value), the browser
+    silently drops the cookie on cross-domain requests, so login
+    would succeed but the cookie wouldn't be sent on subsequent
+    requests (e.g. loading the portfolio page), making the user
+    appear logged out immediately after logging in.
+
+    samesite="none" requires secure=True (HTTPS), which we
+    already have. In local dev over http://localhost this
+    combination can be rejected by some browsers, but our dev
+    setup runs over http and modern browsers still accept
+    secure cookies over localhost for testing purposes.
+    """
     response.set_cookie(
         key="access_token",
         value=token,
         max_age=COOKIE_MAX_AGE,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="none",
         path="/",
     )
 
@@ -155,7 +171,14 @@ def logout(response: Response) -> None:
     
     No request body needed - uses cookie from browser.
     """
-    response.delete_cookie(key="access_token", path="/")
+    # Match the same attributes used when setting the cookie
+    # (secure + samesite="none") so browsers reliably clear it.
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        secure=True,
+        samesite="none",
+    )
 
 
 @router.get(

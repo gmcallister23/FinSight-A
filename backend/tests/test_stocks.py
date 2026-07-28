@@ -67,3 +67,13 @@ def test_price_history_no_data_returns_404(client):
     """Requesting history for symbol with no stored data returns 404."""
     response = client.get("/api/v1/stocks/ZZZZ/history?days=30")
     assert response.status_code == 404
+
+
+def test_history_refresh_requires_auth(client):
+    """
+    /history/refresh triggers an external API call + DB write, so
+    it should require authentication (same risk category as the
+    cache endpoints in Danny's P3 finding).
+    """
+    response = client.post("/api/v1/stocks/AAPL/history/refresh")
+    assert response.status_code == 401

@@ -196,10 +196,14 @@ def clear_cache(
     responses={
         200: {"description": "Price history fetched and stored"},
         400: {"description": "Invalid stock symbol format"},
+        401: {"description": "Not authenticated"},
         503: {"description": "Failed to fetch from Alpha Vantage"},
     },
 )
-def refresh_price_history(symbol: str):
+def refresh_price_history(
+    symbol: str,
+    current_user: User = Depends(get_current_user),
+):
     """
     Fetch daily price history from Alpha Vantage and store in database.
     
