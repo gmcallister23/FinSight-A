@@ -84,6 +84,9 @@ export default function PortfolioPage() {
     };
 
     const handleDeletePortfolio = (portfolioId: string) => {
+        if (selectedPortfolio?.id === portfolioId){
+            dispatch(setSelectedPortfolio(null));
+        }
         dispatch(removePortfolio(portfolioId));
     }
 
@@ -106,11 +109,11 @@ export default function PortfolioPage() {
         dispatch(fetchPortfolios());
     }, [dispatch]);
 
-    useEffect(() => {
-        getPortfolioInsights('5a489d2d-1c1e-4ec8-9c9d-f0e3816a7c36')
-        .then(data => console.log(data))
-        .catch(err => console.error(err))
-    }, [])
+    // useEffect(() => {
+    //     getPortfolioInsights('5a489d2d-1c1e-4ec8-9c9d-f0e3816a7c36')
+    //     .then(data => console.log(data))
+    //     .catch(err => console.error(err))
+    // }, [])
 
     if (portfolioStatus === 'loading') {
         return <p>Loading portfolio...</p>; 
@@ -130,16 +133,17 @@ export default function PortfolioPage() {
                     <div>
                         <h1 className="text-3xl font-bold">Portfolio</h1>
                     </div>
-                    <button className="cursor-pointer rounded-lg bg-cyan-600 px-4 py-2 font-medium hover:bg-cyan-500 transition" onClick={handleCreatePortfolio}>
-                        Create Portfolio
-                    </button>
+                    
                 </header>
                     {!selectedPortfolio && (
                         
                         <div className="text-center">
                             <p>
-                                Select a portfolio to begin.
+                                Create a portfolio to begin.
                             </p>
+                            <button className="cursor-pointer rounded-lg bg-cyan-600 px-4 py-2 font-medium hover:bg-cyan-500 transition" onClick={handleCreatePortfolio}>
+                        Create Portfolio
+                    </button>
                         </div>
                     )}
                     <div>

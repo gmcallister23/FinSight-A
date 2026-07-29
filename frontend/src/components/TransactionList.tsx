@@ -29,21 +29,24 @@ export default function TransactionList() {
                 Transaction History
             </h2>
 
-            <div>
+            
                                        
                 <button 
                 className='border rounded-lg py-2 px-2 bg-cyan-500 mt-2 mb-2 transition hover:bg-slate-500'
                 onClick={() => setShowTransactionForm(true)}>
                     Add Transaction
                 </button>
+                </header>
                 {showTransactionForm && selectedPortfolio && (
+                <div> 
                     <TransactionForm
                     portfolioId={selectedPortfolio.id}
                     onClose={() => setShowTransactionForm(false)}
                     />
+                </div>
                 )}
-            </div>
-            </header>
+            
+            
             {transactions.length === 0 ? (
                 <p className="text-gray-400">
                     No transactions yet.

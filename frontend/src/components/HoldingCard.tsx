@@ -36,7 +36,7 @@ export default function HoldingCard({
                 Average Cost: ${Number(holding.avg_cost).toFixed(2)}
             </div>
             <div>
-                {marketValue.toFixed(2)}
+                ${marketValue.toFixed(2)}
             </div>
 
             <button 

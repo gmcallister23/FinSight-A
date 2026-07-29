@@ -44,7 +44,17 @@ export default function AddHoldingForm({
     return (
 
         <form onSubmit={handleSubmit}>
+            <header
+            className="grid grid-cols-5 gap-4"
+            >
+                <p>Symbol</p>
+                <p>Quantity</p>
+                <p>Price</p>
+                <p></p>
+            </header>
+            <div className="grid grid-cols-5 gap-4">
             <input
+            className="border rounded-lg bg-white text-black"
             type='text'
             placeholder="Symbol"
             value={symbol}
@@ -55,6 +65,7 @@ export default function AddHoldingForm({
             }
             />
             <input
+            className="border rounded-lg bg-white text-black"
             type="number"
             placeholder="Quantity"
             value={quantity}
@@ -63,6 +74,7 @@ export default function AddHoldingForm({
             }
             />
             <input
+            className="border rounded-lg bg-white text-black"
             type='number'
             placeholder="Average Cost"
             value={avgCost}
@@ -70,9 +82,12 @@ export default function AddHoldingForm({
                 setAvgCost(Number(e.target.value))
             }
             />
-            <button type='submit'>
+            
+            <button className='border rounded-lg bg-cyan-400 hover:bg-green-400 transition'type='submit'>
                 Add Holding
             </button>
+            <button className='px-2 border rounded-lg bg-slate-400 hover:bg-red-400 transition'type='button' onClick={onClose}>Cancel</button>
+            </div>
         </form>
 
 )}
