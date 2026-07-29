@@ -20,8 +20,8 @@ export default function Watchlist() {
 
   return (
     <div className="rounded-xl border border-[#24354D] bg-[#101C31] px-3 py-2">
-      <div className="flex items-center gap-6">
-        <div className="flex shrink-0 items-center gap-3">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
+        <div className="flex items-center justify-between gap-3 lg:shrink-0 lg:justify-start">
           <h2 className="text-xl text-white">⭐ Watchlist</h2>
 
           <span className="rounded bg-[#6C63FF] px-2 py-1 text-sm">
@@ -29,7 +29,7 @@ export default function Watchlist() {
           </span>
         </div>
 
-        <div className="flex min-w-0 flex-1 items-center gap-8 overflow-x-auto whitespace-nowrap px-2">
+        <div className="flex w-full min-w-0 items-center gap-6 overflow-x-auto whitespace-nowrap px-0 lg:flex-1 lg:px-2">
           {preview.length === 0 ? (
             <p className="text-gray-400">Your watchlist is empty.</p>
           ) : (
@@ -85,8 +85,8 @@ export default function Watchlist() {
           )}
         </div>
 
-        <Link to="/watchlist" className="shrink-0">
-          <button className="cursor-pointer rounded-lg bg-[#3DD6F5] px-4 py-2 text-sm hover:opacity-50">
+        <Link to="/watchlist" className="w-full lg:w-auto lg:shrink-0">
+          <button className="w-full cursor-pointer rounded-lg bg-[#3DD6F5] px-4 py-2 text-sm hover:opacity-50 lg:w-auto">
             View Full Watchlist →
           </button>
         </Link>

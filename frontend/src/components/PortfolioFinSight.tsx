@@ -28,16 +28,16 @@ export default function PortfolioFinSight() {
 
   return (
     <div className="rounded-xl min-h-[150px] border border-[#24354D] bg-[#101C31] p-4">
-      <div className="grid grid-cols-[300px_1fr_200px] items-center gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px_1fr_200px] lg:items-center">
         {/* Logo + Title */}
         <div className="flex items-center gap-5">
           <img
             src={logo}
             alt="FinSight"
-            className="h-25 w-25 object-contain"
+            className="h-16 w-16 object-contain lg:h-25 lg:w-25"
           />
 
-          <h2 className="text-[20px] font-semibold text-white">
+          <h2 className="text-lg font-semibold text-white lg:text-[20px]">
             FinSight™️ Insight:
           </h2>
         </div>
