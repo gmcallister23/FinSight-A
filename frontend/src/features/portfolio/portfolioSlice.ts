@@ -174,7 +174,7 @@ const portfolioSlice = createSlice({
   name: "portfolio",
   initialState,
   reducers: {
-    setSelectedPortfolio(state, action: PayloadAction<Portfolio>) {
+    setSelectedPortfolio(state, action: PayloadAction<Portfolio | null>) {
       state.selectedPortfolio = action.payload;
     },
   },
